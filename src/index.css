@@ -15,8 +15,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 217 91% 20%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 215 25% 27%;
     --secondary-foreground: 210 40% 98%;
@@ -38,11 +38,11 @@
 
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 187 100% 42%;
+    --ring: 217 91% 60%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    /* Custom tokens - First theme */
+    /* Custom tokens */
     --electric: 187 100% 42%;
     --electric-glow: 187 100% 60%;
     --navy: 217 91% 20%;
@@ -50,7 +50,7 @@
     --steel: 215 25% 27%;
     --slate: 215 20% 65%;
     
-    /* Department Colors - Second theme */
+    /* Department Colors */
     --dept-admin: 280 65% 55%;
     --dept-assembly: 142 76% 36%;
     --dept-climate: 199 89% 48%;
@@ -59,19 +59,20 @@
     --dept-material: 340 82% 52%;
     --dept-testing: 262 83% 58%;
 
-    /* Alternative primary/accent for second theme */
+    /* Alternative colors */
     --primary-alt: 215 80% 50%;
+    --primary-dark: 217 91% 20%;
     --primary-bright: 217 91% 60%;
     --accent-alt: 199 89% 48%;
     
-    /* Gradients - All themes */
+    /* Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(217 91% 20%) 0%, hsl(215 25% 27%) 100%);
     --gradient-hero-alt: linear-gradient(135deg, hsl(215 80% 50%) 0%, hsl(199 89% 48%) 100%);
     --gradient-hero-dark: linear-gradient(135deg, hsl(222 47% 11%) 0%, hsl(215 80% 30%) 100%);
     --gradient-electric: linear-gradient(90deg, hsl(187 100% 42%) 0%, hsl(200 100% 50%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 20% 98%) 100%);
     
-    /* Shadows - Combined */
+    /* Shadows */
     --shadow-sm: 0 1px 2px 0 hsl(222 47% 11% / 0.05);
     --shadow-md: 0 4px 6px -1px hsl(222 47% 11% / 0.1), 0 2px 4px -2px hsl(222 47% 11% / 0.1);
     --shadow-lg: 0 10px 15px -3px hsl(222 47% 11% / 0.1), 0 4px 6px -4px hsl(222 47% 11% / 0.1);
@@ -109,8 +110,8 @@
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 187 100% 42%;
-    --primary-foreground: 222 47% 11%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 217 32% 17%;
     --secondary-foreground: 210 40% 98%;
@@ -132,9 +133,9 @@
 
     --border: 217 32% 17%;
     --input: 217 32% 17%;
-    --ring: 187 100% 42%;
+    --ring: 212 27% 84%;
 
-    /* Alternative primary for second theme in dark mode */
+    /* Alternative colors for dark mode */
     --primary-alt: 215 80% 55%;
     --primary-bright: 217 91% 60%;
     --accent-alt: 199 89% 48%;

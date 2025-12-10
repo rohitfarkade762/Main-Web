@@ -1,5 +1,7 @@
 // src/pages/IndexWithSupabase.tsx
 import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { DashboardHeader } from "@/components/components/dashboard/DashboardHeader";
 import { ProgressCircle } from "@/components/components/dashboard/ProgressCircle";
 import { StatusPipeline } from "@/components/components/dashboard/StatusPipeline";
@@ -13,10 +15,10 @@ import { TestResultBadge } from "@/components/components/dashboard/TestResultBad
 import { LiveChart } from "@/components/components/dashboard/LiveChart";
 import { TripCurveChart } from "@/components/components/dashboard/TripCurveChart";
 import { OpeningEventChart } from "@/components/components/dashboard/OpeningEventChart";
-import { Button } from "@/components/components/ui/button";
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { Play, Zap, Calendar } from "lucide-react";
+import { Play, Zap, Calendar, ArrowLeft } from "lucide-react";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import Export from "./Export";
 
@@ -44,6 +46,7 @@ export default function IndexWithSupabase(): JSX.Element {
   const [status, setStatus] = useState<"idle" | "running" | "pass" | "fail">("idle");
   const [testProgress, setTestProgress] = useState<number>(0);
   const [passRate, setPassRate] = useState<number>(75);
+  const navigate = useNavigate();
 
   // Data
   const [recentTests, setRecentTests] = useState<TestResultLocal[]>([]);
@@ -356,21 +359,33 @@ export default function IndexWithSupabase(): JSX.Element {
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-6">
+      
       <div className="max-w-7xl mx-auto">
-        <Export data ={ myData }/>
+      <Button
+            variant="ghost"
+            onClick={() => navigate(-1)}
+            className="mb-4 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back 
+          </Button>
       {/*<DashboardHeader onExportCSV={handleExportCSV} /> */}
         <p className="text-sm text-muted-foreground mb-6">Track key performance indicators of MCB testing including pass/fail rates, test duration, and upcoming tests.</p>
-
+        
+        <Export data ={ myData }/>
+        
         {/* Top Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-5">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-5 mt-6">
           <div className="lg:col-span-2 bg-card rounded-2xl border border-border p-5 flex flex-col items-center justify-center">
             <p className="text-sm font-medium text-muted-foreground mb-3">Overall Progress</p>
             <ProgressCircle value={passRate} size={100} />
           </div>
+
           <div className="lg:col-span-7"><StatusPipeline steps={pipelineSteps} /></div>
           <div className="lg:col-span-3">
             <HighlightCard title="Next Scheduled Test" value={upcomingTests[0]?.scheduled_date ?? "Today"} subtitle={`MCB Type ${mcbType}`} variant="success" icon={<Calendar className="h-8 w-8" />} />
           </div>
+          
         </div>
 
         {/* Second Row */}
@@ -414,7 +429,11 @@ export default function IndexWithSupabase(): JSX.Element {
             </table>
           </div>
 
-          <ActivityLog title="Test Log" entries={activityLogEntries} />
+          <ActivityLog 
+  title="Test Log" 
+  entries={activityLogEntries.slice(0, 3)}
+  onViewAll={() => navigate('/logs')}
+/>
         </div>
 
         {/* Third Row */}

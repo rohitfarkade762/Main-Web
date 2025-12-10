@@ -17,6 +17,8 @@ import Logistic from "./components/Logistic";
 import Material from "./components/Material";
 import Testing from "./components/Testing";
 import NotFound from "./pages/NotFound";
+import AllLogs from "@/pages/AllLogs";
+
 
 const queryClient = new QueryClient();
 
@@ -27,6 +29,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+        <Route path="/logs" element={<AllLogs />} />
           <Route path="/" element={<Landing />} />
           <Route path="/options" element={<Options />} />
           <Route path="/dashboard" element={<Dashboard />} />
