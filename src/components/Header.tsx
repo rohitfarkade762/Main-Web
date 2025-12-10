@@ -2,8 +2,10 @@ import { motion } from "framer-motion";
 import { Zap, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/ui/button";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navLinks = [
@@ -48,7 +50,7 @@ const Header = () => {
 
           {/* CTA Buttons */}
           <div className="hidden lg:flex items-center gap-4">
-            <Button variant="electric" size="sm">
+            <Button variant="electric" size="sm" onClick={() => navigate("/options")}>
               Get Started
             </Button>
           </div>

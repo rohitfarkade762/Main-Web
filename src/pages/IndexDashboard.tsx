@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+
 import { DashboardHeader } from "@/components/components/dashboard/DashboardHeader";
 import { ProgressCircle } from "@/components/components/dashboard/ProgressCircle";
 import { StatusPipeline } from "@/components/components/dashboard/StatusPipeline";
@@ -20,7 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { Play, Zap, Calendar, ArrowLeft } from "lucide-react";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import Export from "./Export";
+
 
 type TestResultLocal = {
   id: string;
@@ -149,7 +150,7 @@ export default function IndexWithSupabase(): JSX.Element {
   }, [recentTests, activityLogs, upcomingTests, peakCurrent, openingEventData, mcbType, faultCurrent, status]);
   
   // ... then later in JSX replace <Export data ={ exampleData }/> with:
-  <Export data={reportData} />
+
   
   
   // Fetch initial data from Supabase
@@ -452,10 +453,9 @@ export default function IndexWithSupabase(): JSX.Element {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back 
           </Button>
-      {/*<DashboardHeader onExportCSV={handleExportCSV} /> */}
-        <p className="text-sm text-muted-foreground mb-6">Track key performance indicators of MCB testing including pass/fail rates, test duration, and upcoming tests.</p>
+      <DashboardHeader reportData={reportData} /> 
+       
         
-        <Export data ={ reportData }/>
         
         {/* Top Row */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-5 mt-6">
@@ -498,7 +498,7 @@ export default function IndexWithSupabase(): JSX.Element {
                   </SelectContent>
                 </Select>
               </div>
-              <Button variant="success" className="w-full" onClick={runTest} disabled={isRunning}>
+              <Button variant="success" className="w-full bg-green-600 text-white px-4 py-2" onClick={runTest} disabled={isRunning}>
                 {isRunning ? <><Zap className="animate-pulse" /> Running...</> : <><Play /> Run Test</>}
               </Button>
             </div>
@@ -524,7 +524,9 @@ export default function IndexWithSupabase(): JSX.Element {
           <SummarySection title="Test Summary" items={[{ label: "Date", value: new Date().toLocaleDateString() }, { label: "MCB Type", value: `Type ${mcbType}` }, { label: "Fault Current", value: `${faultCurrent} kA` }, { label: "Status", value: status === "idle" ? "Ready" : status.charAt(0).toUpperCase() + status.slice(1) }]} highlightLast />
           <BarChart title="Test Duration (seconds)" data={testDurationData} />
           <div className="bg-card rounded-2xl border border-border overflow-hidden">
-            <div className="bg-success text-success-foreground px-4 py-2"><h3 className="text-sm font-semibold">Recent Tests</h3></div>
+          <div className="bg-green-600 text-white px-4 py-2">
+  <h3 className="text-sm font-semibold">Recent Tests</h3>
+</div>
             <table className="w-full text-sm">
               <thead><tr className="bg-muted/50 border-b border-border"><th className="px-3 py-2 text-left text-muted-foreground">ID</th><th className="px-3 py-2 text-left text-muted-foreground">Result</th><th className="px-3 py-2 text-right text-muted-foreground">Peak</th></tr></thead>
               <tbody>{recentTests.slice(0, 4).map(t => <tr key={t.id} className={t.result === "pass" ? "bg-success/5" : "bg-destructive/5"}><td className="px-3 py-2">{t.id}</td><td className="px-3 py-2"><TestResultBadge result={t.result} size="sm" /></td><td className="px-3 py-2 text-right font-mono">{t.peakCurrent}A</td></tr>)}</tbody>
@@ -532,7 +534,9 @@ export default function IndexWithSupabase(): JSX.Element {
           </div>
 
           <div className="bg-card rounded-2xl border border-border overflow-hidden">
-            <div className="bg-warning text-warning-foreground px-4 py-2"><h3 className="text-sm font-semibold">Upcoming Tests</h3></div>
+          <div className="bg-orange-400 text-white px-4 py-2 rounded-t-xl">
+  <h3 className="text-sm font-semibold">Upcoming Tests</h3>
+</div>
             <table className="w-full text-sm">
               <thead><tr className="bg-muted/50 border-b border-border"><th className="px-3 py-2 text-left text-muted-foreground">Type</th><th className="px-3 py-2 text-left text-muted-foreground">Date</th><th className="px-3 py-2 text-left text-muted-foreground">Priority</th></tr></thead>
               <tbody>{upcomingTests.map((t: any, i: number) => <tr key={i} className="border-b border-border/50"><td className="px-3 py-2">{t.mcb_type}</td><td className="px-3 py-2">{t.scheduled_date}</td><td className="px-3 py-2"><WorkloadBar value={t.priority ?? 0} /></td></tr>)}</tbody>

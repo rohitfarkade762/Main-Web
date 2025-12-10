@@ -185,7 +185,6 @@
     background-image: var(--gradient-electric);
   }
 
-
   .bg-gradient-hero {
     background: var(--gradient-hero);
   }
@@ -254,7 +253,6 @@
     animation: pulse-glow 2s ease-in-out infinite;
   }
 
-  
   .animate-fade-in {
     animation: fadeIn 0.5s ease-out forwards;
   }

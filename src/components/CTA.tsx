@@ -1,8 +1,10 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Mail, Phone, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const CTA = () => {
+  const navigate = useNavigate();
   return (
     <section id="contact" className="py-24 bg-background relative overflow-hidden">
       {/* Background Elements */}
@@ -32,7 +34,7 @@ const CTA = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Button variant="hero" size="xl">
+            <Button variant="hero" size="xl" onClick={() => navigate("/options")}>
             Get Started
               <ArrowRight className="w-5 h-5" />
             </Button>

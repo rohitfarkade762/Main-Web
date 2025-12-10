@@ -33,7 +33,7 @@ export function OpeningEventChart({ data, tripInfo }: OpeningEventChartProps) {
 
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 30 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
             <XAxis
               dataKey="time"
@@ -41,13 +41,20 @@ export function OpeningEventChart({ data, tripInfo }: OpeningEventChartProps) {
               fontSize={12}
               tickLine={false}
               axisLine={false}
-              label={{ value: "Time (ms)", position: "bottom", fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+              label={{ 
+                value: "Time (ms)", 
+                position: "insideBottom", 
+                offset: -20,
+                fontSize: 11, 
+                fill: "hsl(var(--muted-foreground))" 
+              }}
             />
             <YAxis
               stroke="hsl(var(--muted-foreground))"
               fontSize={12}
               tickLine={false}
               axisLine={false}
+              width={50}
             />
             <Tooltip
               contentStyle={{
@@ -57,7 +64,11 @@ export function OpeningEventChart({ data, tripInfo }: OpeningEventChartProps) {
                 boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
               }}
             />
-            <Legend />
+            <Legend 
+              verticalAlign="top" 
+              height={36}
+              wrapperStyle={{ paddingBottom: "10px" }}
+            />
             <Line
               type="monotone"
               dataKey="voltage"
