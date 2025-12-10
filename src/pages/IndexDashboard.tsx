@@ -68,7 +68,90 @@ export default function IndexWithSupabase(): JSX.Element {
     setPeakCurrent(145.2);
     setLastUpdateTime(new Date().toLocaleTimeString());
   };
-  const myData = [{ id: "T-001", type: "B", result: "PASS" , Voltage: 220}];
+  const reportData = React.useMemo(() => {
+    // Map recentTests -> tripRows
+    const tripRows = recentTests.slice(0, 10).map((t, idx) => ({
+      sNo: String(idx + 1),
+      type: t.type ?? mcbType ?? "B",
+      poles: "2", // default; change if you have actual value
+      rating: String(t.peakCurrent ? Math.round(t.peakCurrent) : 63),
+      expectedTripTime: t.duration ? `${(t.duration * 0.9).toFixed(2)}s` : "", // heuristic expected value
+      actualTripTime: t.duration ? `${t.duration}s` : "",
+      tripTimeInCurve: t.duration ? (t.duration < 1 ? "Fast" : "Normal") : "",
+      catalogueNo: t.id ?? "",
+      currentA: String(Math.round(t.peakCurrent ?? 0)),
+      time: t.timestamp ?? "",
+    }));
+  
+    // Map activityLogs -> inspections (use first 6, fallback to placeholders)
+    const inspections = (activityLogs.length ? activityLogs : []).slice(0, 6).map((l: any, i: number) => ({
+      description: l.message ?? l.title ?? `Log ${i + 1}`,
+      status: l.log_type === "error" || l.type === "warning" ? "Fail" : "OK",
+      remarks: l.details ?? l.description ?? "",
+    }));
+  
+    // Product spec: prefer upcomingTests[0], else fallback to simple productSpec
+    const next = upcomingTests[0] ?? {};
+    const productSpec = {
+      ref: next.id ?? "",
+      serialNo: next.serial_no ?? next.serialNo ?? "",
+      modelNo: next.model_no ?? next.modelNo ?? "",
+      noOfPoles: next.no_of_poles ?? next.noOfPoles ?? "2",
+      type: next.mcb_type ?? mcbType ?? "MCB",
+      ratedCurrent: next.rated_current ?? `${faultCurrent}`,
+      ratedVoltage: next.rated_voltage ?? "230",
+      ratedFrequency: next.rated_frequency ?? "50Hz",
+      ratedShortCircuitBreakingCapacity: next.rated_sc_breaking_capacity ?? "",
+      magneticReleaseSetting: next.magnetic_release_setting ?? "",
+      ratedInsulationVoltage: next.rated_insulation_voltage ?? "",
+      ratedImpulseVoltage: next.rated_impulse_voltage ?? "",
+      electricalMechanicalEndurance: next.endurance ?? "",
+      ambientWorkingTemperature: next.ambient_temp ?? "",
+      terminalCapacity: next.terminal_capacity ?? "",
+      vibration: next.vibration ?? "",
+      shockResistance: next.shock ?? "",
+      protectionClass: next.protection_class ?? "",
+      installationPosition: next.installation_position ?? "",
+      mounting: next.mounting ?? "",
+      caseAndCover: next.case_cover ?? "",
+      auxiliaryContacts: next.aux_contacts ?? "",
+      shuntTrip: next.shunt_trip ?? "",
+    };
+  
+    // header: include latest telemetry-derived values where available
+    const header = {
+      date: new Date().toLocaleDateString(),
+      currentA: String(Math.round(peakCurrent ?? Number(faultCurrent) ?? 0)),
+      voltage: openingEventData[0]?.voltage ? String(Math.round(openingEventData[0].voltage)) : "230",
+      title: "MCB TRIP TEST REPORT",
+    };
+  
+    // testedBy: best-effort from recentTests first item, else generic
+    const testedBy = {
+      name: recentTests[0]?.id ? `Operator (${recentTests[0].id})` : "Automated System",
+      date: new Date().toLocaleDateString(),
+      reviewedBy: "QA Team",
+      result: status === "pass" ? "Pass" : status === "fail" ? "Fail" : "In Progress",
+    };
+  
+    return {
+      header,
+      tripRows,
+      inspections: inspections.length ? inspections : [
+        { description: "Physical condition", status: "OK", remarks: "" },
+        { description: "Connections tightness", status: "OK", remarks: "" },
+        { description: "Markings / labels", status: "OK", remarks: "" },
+        { description: "Accessories", status: "OK", remarks: "" },
+      ],
+      productSpec,
+      testedBy,
+    };
+  }, [recentTests, activityLogs, upcomingTests, peakCurrent, openingEventData, mcbType, faultCurrent, status]);
+  
+  // ... then later in JSX replace <Export data ={ exampleData }/> with:
+  <Export data={reportData} />
+  
+  
   // Fetch initial data from Supabase
   useEffect(() => {
     let mounted = true;
@@ -372,7 +455,7 @@ export default function IndexWithSupabase(): JSX.Element {
       {/*<DashboardHeader onExportCSV={handleExportCSV} /> */}
         <p className="text-sm text-muted-foreground mb-6">Track key performance indicators of MCB testing including pass/fail rates, test duration, and upcoming tests.</p>
         
-        <Export data ={ myData }/>
+        <Export data ={ reportData }/>
         
         {/* Top Row */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-5 mt-6">
