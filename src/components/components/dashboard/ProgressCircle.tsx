@@ -35,7 +35,7 @@ export function ProgressCircle({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="hsl(var(--primary))"
+          stroke="hsl(217, 91%, 60%)"
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={offset}

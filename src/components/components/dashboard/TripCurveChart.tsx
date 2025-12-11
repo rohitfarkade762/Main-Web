@@ -35,13 +35,10 @@ export function TripCurveChart({ data, mcbType }: TripCurveChartProps) {
 
   const curveData = generateCurve();
 
-  // 🔥 Print to console to ensure connection
-  console.log("🚀 TripCurveChart Rendered → MCB Type:", mcbType, "Curve Points:", curveData, "Actual Data:", data);
-
   return (
     <DashboardCard>
-      <CardHeader 
-        title="Tripping Characteristic" 
+      <CardHeader
+        title="Tripping Characteristic"
         subtitle={`Type ${mcbType} MCB (log-log scale)`}
       />
 

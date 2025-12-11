@@ -21,16 +21,13 @@ export function TestResultBadge({ result, size = "md" }: TestResultBadgeProps) {
     lg: 20,
   };
 
-  // ✅ Console log to ensure connection
-  console.log(`TestResultBadge Rendered → Result: ${result}, Size: ${size}`);
-
   return (
     <span
       className={cn(
         "inline-flex items-center rounded-full font-bold uppercase tracking-wide border-2 transition-all",
         sizeClasses[size],
         isPass
-          ? "bg-success/15 text-success border-success/40 shadow-sm shadow-success/20"
+          ? "bg-green-200 text-green-500 border-green-500 shadow-sm shadow-green-200"
           : "bg-destructive/15 text-destructive border-destructive/40 shadow-sm shadow-destructive/20"
       )}
     >

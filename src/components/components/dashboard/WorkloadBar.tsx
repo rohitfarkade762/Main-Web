@@ -15,9 +15,9 @@ export function WorkloadBar({ value, max = 100, className }: WorkloadBarProps) {
         <div
           className={cn(
             "h-full rounded-full transition-all duration-300",
-            percentage < 30 && "bg-success",
-            percentage >= 30 && percentage < 70 && "bg-warning",
-            percentage >= 70 && "bg-destructive"
+            percentage < 30 && "bg-green-500",
+            percentage >= 30 && percentage < 70 && "bg-red-500",
+            percentage >= 70 && "bg-slate-50"
           )}
           style={{ width: `${percentage}%` }}
         />

@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { DashboardCard, CardFooter } from "./DashboardCard";
 import { StatusBadge } from "./StatusBadge";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -28,19 +27,6 @@ export function LiveChart({
   lastTime,
   unit = "A",
 }: LiveChartProps) {
-
-  // 🔥 Backend Connectivity Check
-  useEffect(() => {
-    fetch("http://127.0.0.1:5000/")
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("LiveChart Connected to Flask:", data.message);
-      })
-      .catch((error) => {
-        console.error("LiveChart Failed to Connect:", error);
-      });
-  }, []);
-
   return (
     <DashboardCard>
       <div className="flex justify-between items-start mb-4">
@@ -60,7 +46,7 @@ export function LiveChart({
         )}
       </div>
 
-      <div className="h-60">
+      <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>

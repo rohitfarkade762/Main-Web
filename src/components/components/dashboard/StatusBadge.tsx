@@ -33,9 +33,6 @@ export function StatusBadge({ status, label }: StatusBadgeProps) {
 
   const config = statusConfig[status];
 
-  // ✅ Print to console to ensure connection
-  console.log(`StatusBadge Rendered → Status: ${status}, Label: ${label || config.text}`);
-
   return (
     <span
       className={cn(

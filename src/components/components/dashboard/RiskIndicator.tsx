@@ -22,9 +22,9 @@ export function RiskIndicator({ title, items }: RiskIndicatorProps) {
             <span
               className={cn(
                 "text-lg font-bold min-w-[50px]",
-                item.severity === "high" && "text-destructive",
-                item.severity === "medium" && "text-warning",
-                item.severity === "low" && "text-success"
+                item.severity === "high" && "text-red-500",
+                item.severity === "medium" && "text-amber-500",
+                item.severity === "low" && "text-green-500"
               )}
             >
               {item.value}
@@ -34,13 +34,13 @@ export function RiskIndicator({ title, items }: RiskIndicatorProps) {
                 <AlertTriangle className="h-4 w-4 text-destructive" />
               )}
               {item.severity === "medium" && (
-                <AlertCircle className="h-4 w-4 text-warning" />
+                <AlertCircle className="h-4 w-4 text-amber-500" />
               )}
               <span
                 className={cn(
                   item.severity === "high" && "text-destructive",
-                  item.severity === "medium" && "text-warning",
-                  item.severity === "low" && "text-success"
+                  item.severity === "medium" && "text-amber-500",
+                  item.severity === "low" && "text-green-500"
                 )}
               >
                 {item.label}
