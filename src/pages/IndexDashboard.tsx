@@ -1,6 +1,7 @@
 // src/pages/IndexWithSupabase.tsx
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import styles from "@/IndexDashboard.css";
 import { Button } from "@/components/ui/button";
 
 import { DashboardHeader } from "@/components/components/dashboard/DashboardHeader";
@@ -60,6 +61,7 @@ export default function IndexWithSupabase(): JSX.Element {
   const [powerFactor, setPowerFactor] = useState<number>(0.95);
   const [lastUpdateTime, setLastUpdateTime] = useState<string>("--");
   const [loading, setLoading] = useState<boolean>(true);
+  const [inputPowerFactor, setInputPowerFactor] = useState("0.85");
 
   // Helper: generate sample UI data (fallback)
   const generateFallbacks = () => {
@@ -83,14 +85,14 @@ export default function IndexWithSupabase(): JSX.Element {
       currentA: String(Math.round(t.peakCurrent ?? 0)),
       time: t.timestamp ?? "",
     }));
-  
+
     // Map activityLogs -> inspections (use first 6, fallback to placeholders)
     const inspections = (activityLogs.length ? activityLogs : []).slice(0, 6).map((l: any, i: number) => ({
       description: l.message ?? l.title ?? `Log ${i + 1}`,
       status: l.log_type === "error" || l.type === "warning" ? "Fail" : "OK",
       remarks: l.details ?? l.description ?? "",
     }));
-  
+
     // Product spec: prefer upcomingTests[0], else fallback to simple productSpec
     const next = upcomingTests[0] ?? {};
     const productSpec = {
@@ -118,7 +120,7 @@ export default function IndexWithSupabase(): JSX.Element {
       auxiliaryContacts: next.aux_contacts ?? "",
       shuntTrip: next.shunt_trip ?? "",
     };
-  
+
     // header: include latest telemetry-derived values where available
     const header = {
       date: new Date().toLocaleDateString(),
@@ -126,7 +128,7 @@ export default function IndexWithSupabase(): JSX.Element {
       voltage: openingEventData[0]?.voltage ? String(Math.round(openingEventData[0].voltage)) : "230",
       title: "MCB TRIP TEST REPORT",
     };
-  
+
     // testedBy: best-effort from recentTests first item, else generic
     const testedBy = {
       name: recentTests[0]?.id ? `Operator (${recentTests[0].id})` : "Automated System",
@@ -134,7 +136,7 @@ export default function IndexWithSupabase(): JSX.Element {
       reviewedBy: "QA Team",
       result: status === "pass" ? "Pass" : status === "fail" ? "Fail" : "In Progress",
     };
-  
+
     return {
       header,
       tripRows,
@@ -148,11 +150,11 @@ export default function IndexWithSupabase(): JSX.Element {
       testedBy,
     };
   }, [recentTests, activityLogs, upcomingTests, peakCurrent, openingEventData, mcbType, faultCurrent, status]);
-  
+
   // ... then later in JSX replace <Export data ={ exampleData }/> with:
 
-  
-  
+
+
   // Fetch initial data from Supabase
   useEffect(() => {
     let mounted = true;
@@ -305,7 +307,7 @@ export default function IndexWithSupabase(): JSX.Element {
     setStatus("running");
     setTestProgress(0);
 
-    toast({ title: "Test Started", description: `Running MCB Type ${mcbType} test at ${faultCurrent} kA` });
+    toast({ title: "Test Started", description: `Running MCB Type ${mcbType} test at ${faultCurrent} kA, PF: ${inputPowerFactor}` });
 
     const progressInterval = setInterval(() => { setTestProgress((p) => Math.min(p + 15, 95)); }, 400);
 
@@ -343,7 +345,7 @@ export default function IndexWithSupabase(): JSX.Element {
           mcb_type: mcbType,
           fault_current: Number(faultCurrent) || null,
           peak_current: Math.round(peak * 10) / 10,
-          power_factor: powerFactor,
+          power_factor: parseFloat(inputPowerFactor),
           result: resultStr,
           status: "Completed",
           duration_seconds: Math.round(duration * 10) / 10,
@@ -369,7 +371,7 @@ export default function IndexWithSupabase(): JSX.Element {
       // insert a system log entry
       try {
         await supabase.from("system_logs").insert([{
-          message: `Test ${newId} completed with result ${resultStr}`,
+          message: `Test ${newId} completed with result ${resultStr}, PF ${inputPowerFactor}`,
           log_type: pass ? "success" : "error",
         }]);
       } catch (err) {
@@ -388,7 +390,7 @@ export default function IndexWithSupabase(): JSX.Element {
         variant: pass ? "default" : "destructive",
       });
     }, 3000);
-  }, [mcbType, faultCurrent, recentTests, powerFactor]);
+  }, [mcbType, faultCurrent, recentTests, powerFactor,inputPowerFactor]);
 
   const handleExportCSV = () => {
     const csvContent = [
@@ -443,20 +445,20 @@ export default function IndexWithSupabase(): JSX.Element {
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-6">
-      
+
       <div className="max-w-7xl mx-auto">
-      <Button
-            variant="ghost"
-            onClick={() => navigate(-1)}
-            className="mb-4 text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back 
-          </Button>
-      <DashboardHeader reportData={reportData} /> 
-       
-        
-        
+        <Button
+          variant="ghost"
+          onClick={() => navigate(-1)}
+          className="mb-4 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+        <DashboardHeader reportData={reportData} />
+
+
+
         {/* Top Row */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-5 mt-6">
           <div className="lg:col-span-2 bg-card rounded-2xl border border-border p-5 flex flex-col items-center justify-center">
@@ -468,12 +470,11 @@ export default function IndexWithSupabase(): JSX.Element {
           <div className="lg:col-span-3">
             <HighlightCard title="Next Scheduled Test" value={upcomingTests[0]?.scheduled_date ?? "Today"} subtitle={`MCB Type ${mcbType}`} variant="success" icon={<Calendar className="h-8 w-8" />} />
           </div>
-          
+
         </div>
 
         {/* Second Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-5">
-          <RiskIndicator title="Risk Analysis" items={riskItems} />
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mb-5">
           <div className="bg-card rounded-2xl border border-border p-5">
             <h3 className="text-sm font-semibold text-foreground mb-4">Test Configuration</h3>
             <div className="space-y-4">
@@ -498,12 +499,44 @@ export default function IndexWithSupabase(): JSX.Element {
                   </SelectContent>
                 </Select>
               </div>
-              <Button variant="success" className="w-full bg-green-600 text-white px-4 py-2" onClick={runTest} disabled={isRunning}>
+              
+              <div>
+                <label className="block text-xs text-muted-foreground mb-1.5">Power Factor</label>
+                <Select value={inputPowerFactor} onValueChange={setInputPowerFactor}>
+                  <SelectTrigger className="h-10 bg-muted/50"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0.80">0.80</SelectItem>
+                    <SelectItem value="0.85">0.85</SelectItem>
+                    <SelectItem value="0.90">0.90</SelectItem>
+                    <SelectItem value="0.95">0.95</SelectItem>
+                    <SelectItem value="1.00">1.00 (Unity)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button variant="warning" className="w-full bg-green-600 text-white px-4 py-2" onClick={runTest} disabled={isRunning}>
                 {isRunning ? <><Zap className="animate-pulse" /> Running...</> : <><Play /> Run Test</>}
               </Button>
             </div>
           </div>
+          <LiveChart title="Live Current" subtitle="Real-time current measurement" data={currentData} color="hsl(var(--primary))" gradientId="currentGradient" status={status} peakValue={peakCurrent} powerFactor={powerFactor} lastTime={lastUpdateTime} unit="A" />
+          <TripCurveChart data={tripCurveData} mcbType={mcbType} />
+        </div>
+        
 
+        {/* Third Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mb-5">
+        <OpeningEventChart data={openingEventData} tripInfo={`Last trip: ${lastUpdateTime}`} />
+          <RiskIndicator title="Risk Analysis" items={riskItems} />
+          <BarChart title="Test Duration (seconds)" data={testDurationData} />
+          
+        </div>
+
+        {/* Fourth Row - Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
+          
+          
+          
           <div className="bg-card rounded-2xl border border-border overflow-hidden">
             <div className="bg-destructive text-destructive-foreground px-4 py-2"><h3 className="text-sm font-semibold">Failed Tests</h3></div>
             <table className="w-full text-sm">
@@ -512,31 +545,29 @@ export default function IndexWithSupabase(): JSX.Element {
             </table>
           </div>
 
-          <ActivityLog 
-  title="Test Log" 
-  entries={activityLogEntries.slice(0, 3)}
-  onViewAll={() => navigate('/logs')}
-/>
-        </div>
-
-        {/* Third Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-5">
-          <SummarySection title="Test Summary" items={[{ label: "Date", value: new Date().toLocaleDateString() }, { label: "MCB Type", value: `Type ${mcbType}` }, { label: "Fault Current", value: `${faultCurrent} kA` }, { label: "Status", value: status === "idle" ? "Ready" : status.charAt(0).toUpperCase() + status.slice(1) }]} highlightLast />
-          <BarChart title="Test Duration (seconds)" data={testDurationData} />
+          <ActivityLog
+            title="Test Log"
+            entries={activityLogEntries.slice(0, 3)}
+            onViewAll={() => navigate('/logs')}
+          />
           <div className="bg-card rounded-2xl border border-border overflow-hidden">
-          <div className="bg-green-600 text-white px-4 py-2">
-  <h3 className="text-sm font-semibold">Recent Tests</h3>
-</div>
+            <div className="bg-green-600 text-white px-4 py-2">
+              <h3 className="text-sm font-semibold">Recent Tests</h3>
+            </div>
             <table className="w-full text-sm">
               <thead><tr className="bg-muted/50 border-b border-border"><th className="px-3 py-2 text-left text-muted-foreground">ID</th><th className="px-3 py-2 text-left text-muted-foreground">Result</th><th className="px-3 py-2 text-right text-muted-foreground">Peak</th></tr></thead>
               <tbody>{recentTests.slice(0, 4).map(t => <tr key={t.id} className={t.result === "pass" ? "bg-success/5" : "bg-destructive/5"}><td className="px-3 py-2">{t.id}</td><td className="px-3 py-2"><TestResultBadge result={t.result} size="sm" /></td><td className="px-3 py-2 text-right font-mono">{t.peakCurrent}A</td></tr>)}</tbody>
             </table>
           </div>
+          
+        <SummarySection title="Test Summary" items={[{ label: "Date", value: new Date().toLocaleDateString() }, { label: "MCB Type", value: `Type ${mcbType}` }, { label: "Fault Current", value: `${faultCurrent} kA` }, { label: "Status", value: status === "idle" ? "Ready" : status.charAt(0).toUpperCase() + status.slice(1) }]} highlightLast />
 
-          <div className="bg-card rounded-2xl border border-border overflow-hidden">
-          <div className="bg-orange-400 text-white px-4 py-2 rounded-t-xl">
-  <h3 className="text-sm font-semibold">Upcoming Tests</h3>
-</div>
+        </div>
+        <div className = "grid grid-cols-1 lg:grid-cols-4 gap-5 mt-5">
+        <div className="bg-card rounded-2xl border border-border overflow-hidden">
+            <div className="bg-orange-400 text-white px-4 py-2 rounded-t-xl">
+              <h3 className="text-sm font-semibold">Upcoming Tests</h3>
+            </div>
             <table className="w-full text-sm">
               <thead><tr className="bg-muted/50 border-b border-border"><th className="px-3 py-2 text-left text-muted-foreground">Type</th><th className="px-3 py-2 text-left text-muted-foreground">Date</th><th className="px-3 py-2 text-left text-muted-foreground">Priority</th></tr></thead>
               <tbody>{upcomingTests.map((t: any, i: number) => <tr key={i} className="border-b border-border/50"><td className="px-3 py-2">{t.mcb_type}</td><td className="px-3 py-2">{t.scheduled_date}</td><td className="px-3 py-2"><WorkloadBar value={t.priority ?? 0} /></td></tr>)}</tbody>
@@ -544,12 +575,6 @@ export default function IndexWithSupabase(): JSX.Element {
           </div>
         </div>
 
-        {/* Fourth Row - Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          <LiveChart title="Live Current" subtitle="Real-time current measurement" data={currentData} color="hsl(var(--primary))" gradientId="currentGradient" status={status} peakValue={peakCurrent} powerFactor={powerFactor} lastTime={lastUpdateTime} unit="A" />
-          <TripCurveChart data={tripCurveData} mcbType={mcbType} />
-          <OpeningEventChart data={openingEventData} tripInfo={`Last trip: ${lastUpdateTime}`} />
-        </div>
       </div>
     </div>
   );
