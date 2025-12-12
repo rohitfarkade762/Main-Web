@@ -24,8 +24,9 @@ export interface ActivityLog {
 
 export interface TestConfiguration {
   id: string;
-  mcb_type: 'B' | 'C' | 'D';
+  mcb_rating: number;
   fault_current: number;
   power_factor: number;
   created_at: string;
+  voltage : number;
 }

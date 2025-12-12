@@ -34,9 +34,12 @@ interface TestResult {
 
 const Index = () => {
   const navigate = useNavigate();
-  const [mcbType, setMcbType] = useState("B");
-  const [faultCurrent, setFaultCurrent] = useState("6");
-  const [inputPowerFactor, setInputPowerFactor] = useState("0.85");
+  const [mcbType, setMcbType] = useState<string>("B");           
+  const [voltage, setVoltage] = useState<string>("240");    // mcb_type (text)
+  const [faultCurrent, setFaultCurrent] = useState<string>("6");    // fault_current (real) kept as string for input; parseFloat when sending
+  const [inputPowerFactor, setInputPowerFactor] = useState<string>("0.85"); // power_factor (real)
+  const [mcbRating, setMcbRating] = useState<number>(63);           // mcb_rating (integer)
+  
   const [isRunning, setIsRunning] = useState(false);
   const [status, setStatus] = useState<"idle" | "running" | "pass" | "fail">("idle");
   const [testProgress, setTestProgress] = useState(0);
@@ -297,10 +300,12 @@ const reportData = React.useMemo(() => {
 
     // Save test configuration to Supabase
     await supabase.from('test_configurations').insert({
-      mcb_type: mcbType,
+      voltage : parseFloat(voltage),
       fault_current: parseFloat(faultCurrent),
       power_factor: parseFloat(inputPowerFactor),
+      mcb_rating: mcbRating, // new
     });
+    
 
 
     // Log activity
@@ -328,10 +333,11 @@ const reportData = React.useMemo(() => {
         mcb_type: mcbType,
         fault_current: parseInt(faultCurrent),
         power_factor: parseFloat(inputPowerFactor),
+        mcb_rating: mcbRating, // optional
         trip_time: tripTime,
         result,
       });
-
+      
       // Log activity
       await supabase.from('activity_logs').insert({
         action: result === 'pass' ? 'Test Completed' : 'Test Failed',
@@ -402,47 +408,68 @@ const reportData = React.useMemo(() => {
         {/* Second Row */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
         <div className="bg-card rounded-2xl border border-border p-5">
-            <h3 className="text-sm font-semibold text-foreground mb-5">Test Configuration</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs text-muted-foreground mb-2">MCB Type</label>
-                <Select value={mcbType} onValueChange={setMcbType}>
-                  <SelectTrigger className="h-10 bg-muted/50"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="B">Type B</SelectItem>
-                    <SelectItem value="C">Type C</SelectItem>
-                    <SelectItem value="D">Type D</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-xs text-muted-foreground mb-2">Fault Current</label>
-                <Select value={faultCurrent} onValueChange={setFaultCurrent}>
-                  <SelectTrigger className="h-10 bg-muted/50"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="6">6 kA</SelectItem>
-                    <SelectItem value="10">10 kA</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-xs text-muted-foreground mb-2">Power Factor</label>
-                <Select value={inputPowerFactor} onValueChange={setInputPowerFactor}>
-                  <SelectTrigger className="h-10 bg-muted/50"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="0.80">0.80</SelectItem>
-                    <SelectItem value="0.85">0.85</SelectItem>
-                    <SelectItem value="0.90">0.90</SelectItem>
-                    <SelectItem value="0.95">0.95</SelectItem>
-                    <SelectItem value="1.00">1.00 (Unity)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button className="w-full bg-green-500 text-white hover:bg-green-400 mt-2" onClick={runTest} disabled={isRunning}>
-                {isRunning ? <><Zap className="animate-pulse mr-2" /> Running...</> : <><Play className="mr-2" /> Run Test</>}
-              </Button>
-            </div>
-            </div>
+  <h3 className="text-sm font-semibold text-foreground mb-5">Test Configuration</h3>
+  <div className="space-y-4">
+  <div>
+      <label className="block text-xs text-muted-foreground mb-2">Voltge</label>
+      <input
+        type="number"
+        step="10"
+        value={voltage}
+        onChange={(e) => setVoltage(e.target.value)}
+        placeholder="e.g. 240"
+        className="w-full h-10 px-3 rounded-md bg-muted/50 border border-border text-sm"
+      />
+    </div>
+
+    <div>
+      <label className="block text-xs text-muted-foreground mb-2">Fault Current (fault_current, kA)</label>
+      <input
+        type="number"
+        step="0.01"
+        value={faultCurrent}
+        onChange={(e) => setFaultCurrent(e.target.value)}
+        placeholder="e.g. 6"
+        className="w-full h-10 px-3 rounded-md bg-muted/50 border border-border text-sm"
+      />
+    </div>
+
+    <div>
+      <label className="block text-xs text-muted-foreground mb-2">Power Factor (power_factor)</label>
+      <input
+        type="number"
+        step="0.01"
+        min="0"
+        max="1.0"
+        value={inputPowerFactor}
+        onChange={(e) => setInputPowerFactor(e.target.value)}
+        placeholder="e.g. 0.85"
+        className="w-full h-10 px-3 rounded-md bg-muted/50 border border-border text-sm"
+      />
+    </div>
+
+    <div>
+      <label className="block text-xs text-muted-foreground mb-2">MCB Rating (mcb_rating)</label>
+      <input
+        type="number"
+        step="1"
+        min="0"
+        value={mcbRating}
+        onChange={(e) => {
+          const v = parseInt(e.target.value, 10);
+          setMcbRating(Number.isNaN(v) ? 0 : v);
+        }}
+        placeholder="e.g. 63"
+        className="w-full h-10 px-3 rounded-md bg-muted/50 border border-border text-sm"
+      />
+    </div>
+
+    <Button className="w-full bg-green-500 text-white hover:bg-green-400 mt-2" onClick={runTest} disabled={isRunning}>
+      {isRunning ? <><Zap className="animate-pulse mr-2" /> Running...</> : <><Play className="mr-2" /> Run Test</>}
+    </Button>
+  </div>
+</div>
+
           <LiveChart
             title="Real-time Current"
             subtitle="Real-time current measurement"
